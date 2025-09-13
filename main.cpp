@@ -24,7 +24,7 @@ public:
 		}
 	}
 
-	Matrix(bool flag, int lines, int columns,int inf, int sup) : _lines(lines), _columns(columns) { //только для целых цисел
+	Matrix(bool flag, int lines, int columns,int inf, int sup) : _lines(lines), _columns(columns) { //only int
 		_Matrixptr = new T[lines * columns];
 		default_random_engine e;
 		uniform_int_distribution d(inf, sup);
@@ -74,7 +74,7 @@ int main() {
 	Matrix<int>test(true,2,4,12,24);
 	Matrix<int>test1(test);
 	test1.vivod();
-	cout << "число 3 сторка 1 столбец:" << test(1, 1);
+	cout << "3 line 1 column = " << test(1, 1);
 	test1(1, 1) = 111;
 	test1.vivod();
 	return 0;
