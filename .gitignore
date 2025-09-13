@@ -1,4 +1,5 @@
 out/
+.vs/
 
 # Prerequisites
 *.d
