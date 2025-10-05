@@ -19,7 +19,7 @@ public:
   Matrix() :_Matrixptr(nullptr), _lines(0), _columns(0) {}
 
   Matrix(size_t lines, size_t columns, T value) : _lines(lines), _columns(columns) {
-    _Matrixptr = new T[_lines * _columns];
+    _Matrixptr = new T[lines * columns];
     for (size_t i = 0; i < lines * columns; i++) {
       _Matrixptr[i] = value;
     }
@@ -78,7 +78,7 @@ public:
     }
   }
 
-  Matrix(const Matrix& other):_lines(other._lines),_columns(other._columns)
+  Matrix(const Matrix& other) :_lines(other._lines), _columns(other._columns)
   {
     if (other._Matrixptr == nullptr) {
       _Matrixptr = nullptr;
@@ -90,7 +90,7 @@ public:
       }
     }
   }
-
+  
   bool operator==(const Matrix<T>& rhs) const
   {
     if (_lines != rhs.getlines() || _columns!=rhs.getcolumns())
