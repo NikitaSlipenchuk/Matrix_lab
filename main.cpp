@@ -25,15 +25,15 @@ public:
     }
   }
 
-	Matrix(size_t lines, size_t columns,int inf, int sup) : _lines(lines), _columns(columns) { //for  int
-		_Matrixptr = new T[lines * columns];
+  Matrix(size_t lines, size_t columns, int inf, int sup) : _lines(lines), _columns(columns) { //for  int
+    _Matrixptr = new T[lines * columns];
     std::random_device engine;
     std::uniform_int_distribution distribution(std::min(inf, sup), std::max(inf, sup));
-    for (size_t i = 0; i < columns*lines; i++)
+    for (size_t i = 0; i < columns * lines; i++)
     {
       _Matrixptr[i] = distribution(engine);
     }
-	}
+  }
 
   Matrix(size_t lines, size_t columns, float inf, float sup) : _lines(lines), _columns(columns) { //for  float
     _Matrixptr = new T[lines * columns];
@@ -56,11 +56,11 @@ public:
   }
 
   Matrix(size_t lines, size_t columns, complex<float> inf, complex<float> sup) : _lines(lines), _columns(columns) { //for  complex<float>
-    _Matrixptr = new T[lines*columns];
+    _Matrixptr = new T[lines * columns];
     std::random_device engine;
     std::uniform_real_distribution distributionre(std::min(sup.real(), inf.real()), std::max(sup.real(), inf.real()));
     std::uniform_real_distribution distributionim(std::min(sup.imag(), inf.imag()), std::max(sup.imag(), inf.imag()));
-    for (size_t i = 0; i < columns*lines; i++)
+    for (size_t i = 0; i < columns * lines; i++)
     {
       _Matrixptr[i] = std::complex<float>(distributionre(engine), distributionim(engine));
     }
@@ -78,14 +78,14 @@ public:
     }
   }
 
-  Matrix(const Matrix& other)
-    : _lines(other._lines), _columns(other._columns) {
+  Matrix(const Matrix& other):_lines(other._lines),_columns(other._columns)
+  {
     if (other._Matrixptr == nullptr) {
       _Matrixptr = nullptr;
     }
     else {
       _Matrixptr = new T[_lines * _columns];
-      for (size_t i = 0; i < _lines * _columns; i++) {
+      for (size_t i = 0; i < other._lines * other._columns; i++) {
         _Matrixptr[i] = other._Matrixptr[i];
       }
     }
@@ -197,7 +197,7 @@ Matrix operator/(T scalar) const {
 T trace() const {
   T trace = 0;
   for (size_t i = 0; i < _lines; i++) {
-    for (size_t j = 0; j < _lines; j++) {
+    for (size_t j = 0; j < _columns; j++) {
       if (i == j) {
         trace += this->operator()(i, j);
       }
@@ -207,29 +207,17 @@ T trace() const {
 }
 
 
-/*Matrix& operator*=(const Matrix& rhs) {
-  Matrix result(_lines, rhs._columns);
-
-  for (int i = 0; i < _lines; i++) {
-    for (int j = 0; j < rhs._columns; j++) {
-      T sum = 0;
-      for (int k = 0; k < _columns; k++) {
-        sum += _Matrixptr[i * _columns + k] * rhs._Matrixptr[k * rhs._columns + j];
+Matrix operator*(const Matrix& rhs) const {
+  Matrix<T>result(_lines, rhs._columns, 0);
+  for (size_t i = 0; i < _lines; i++) {
+    for (size_t j = 0; j < rhs._columns; j++) {
+      for (size_t k = 0; k < _columns; k++) {
+        result(i, j) += this->operator()(i, k) * rhs(k, j);
       }
-      result._Matrixptr[i * result._columns + j] = sum;
     }
   }
-
-  // Глубокое копирование вместо поверхностного
-  delete[] _Matrixptr;
-  _Matrixptr = new T[result._lines * result._columns];
-  std::copy(result._Matrixptr, result._Matrixptr + result._lines * result._columns, _Matrixptr);
-
-  _lines = result._lines;
-  _columns = result._columns;
-
-  return *this;
-}*/
+  return result;
+}
 
 
 	~Matrix() {
@@ -290,16 +278,13 @@ std::ostream& operator<<(std::ostream& os, const Matrix<T>& Matrix)
 int main() {
 	cout << "Helloworld";
 	cout << "\nvivod\n";
-  Matrix<complex<double>>test(2, 4, complex<double>(2.3,15), complex<double>(4.8, 2.3));
-	Matrix<complex<double>>test1(test);
+  Matrix<complex<double>>test1(2, 4, complex<double>(2.3,5.8), complex<double>(1.5,9.3)), test2(4, 3, complex<double>(2.3, 11.3), complex<double>(4.5, 6.7));
+	Matrix<int>test;
   cout << test1;
-	cout <<endl<< "2 line 2 column = " << test(1, 1) <<endl;
-  Matrix<complex<double>>test2(2, 4, complex<double>(1.1, 22), complex<double>(3.2, 5.8));
-  test2 = test1/2;
   cout << test2;
   cout << "\n" << (test2 != test1);
   cout << "\n" << test2.trace();
-  //Matrix<int>result = test1/2;
-//	result.vivod();
+  Matrix<complex<double>>result = test1 * test2;
+  cout << result;
 	return 0;
 }
