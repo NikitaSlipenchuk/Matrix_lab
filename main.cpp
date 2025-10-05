@@ -13,6 +13,8 @@ private:
   T* _Matrixptr;
   size_t _lines;
   size_t _columns;
+  inline static const double epsilon = 0.001;
+
 public:
   Matrix() :_Matrixptr(nullptr), _lines(0), _columns(0) {}
 
@@ -80,12 +82,35 @@ public:
     : _lines(other._lines), _columns(other._columns) {
     if (other._Matrixptr == nullptr) {
       _Matrixptr = nullptr;
-      return;
     }
-    _Matrixptr = new T[_lines * _columns];
-    for (size_t i = 0; i < _lines * _columns; i++) {
-      _Matrixptr[i] = other._Matrixptr[i];
+    else {
+      _Matrixptr = new T[_lines * _columns];
+      for (size_t i = 0; i < _lines * _columns; i++) {
+        _Matrixptr[i] = other._Matrixptr[i];
+      }
     }
+  }
+
+  bool operator==(const Matrix<T>& rhs) const
+  {
+    if (_lines != rhs.getlines() || _columns!=rhs.getcolumns())
+    {
+      return false;
+    }
+    for (size_t i = 0; i < _columns*_lines; i++)
+    {
+      double difference = abs(static_cast<double>(_Matrixptr[i]) - static_cast<double>(rhs._Matrixptr[i]));
+      if (difference > epsilon)
+      {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  bool operator!=(const Matrix<T>& rhs) const
+  {
+    return !(*this == rhs);
   }
 
   Matrix& operator=(const Matrix& other) {
@@ -106,29 +131,20 @@ public:
     return *this;
   }
 
-  int getlines() const {
+  size_t getlines() const {
     return _lines;
   }
 
-  int getcolumns() const {
+  size_t getcolumns() const {
     return _columns;
+  }
+
+  T operator()(int line, int column) const {
+    return _Matrixptr[line * _columns + column];
   }
 
 	T& operator()(int line, int column) {
 		return _Matrixptr[line * _columns + column];
-	}
-
-	void vivod() const {
-		cout << "\n";
-    size_t temp = 0;
-		for (size_t i = 0; i < _lines * _columns; i++) {
-      cout << _Matrixptr[i] << " ";
-			temp++;
-			if (temp >= _columns) {
-				cout << format("\n");
-				temp = 0;
-			}
-		}
 	}
 
   Matrix& operator+=(const Matrix rhs) {
@@ -169,15 +185,27 @@ friend Matrix operator*(T scalar, const Matrix& rhs) {
   return rhs * scalar; 
 }
 
-/*
+
 Matrix operator/(T scalar) const {
-  Matrix result(_lines, _columns);
+  Matrix result(_lines, _columns,0);
   for (int i = 0; i < _lines * _columns; i++) {
     result._Matrixptr[i] = _Matrixptr[i] / scalar;
   }
   return result;
 }
-*/
+
+T trace() const {
+  T trace = 0;
+  for (size_t i = 0; i < _lines; i++) {
+    for (size_t j = 0; j < _lines; j++) {
+      if (i == j) {
+        trace += this->operator()(i, j);
+      }
+    }
+  }
+  return trace;
+}
+
 
 /*Matrix& operator*=(const Matrix& rhs) {
   Matrix result(_lines, rhs._columns);
@@ -209,17 +237,68 @@ Matrix operator/(T scalar) const {
 	}
 };
 
+template<>
+inline bool Matrix<std::complex<float> >::operator==(const Matrix<std::complex<float> >& rhs) const {
+  if (_lines!=rhs._lines || _columns!=rhs._columns)
+  {
+    return false;
+  }
+  for (size_t i = 0; i < _columns*_lines; i++)
+  {
+    double difference_re = abs((double)_Matrixptr[i].real() - (double)rhs._Matrixptr[i].real());
+    double difference_im = abs((double)_Matrixptr[i].imag() - (double)rhs._Matrixptr[i].imag());
+    if (difference_re > epsilon || difference_im > epsilon)
+    {
+      return false;
+    }
+  }
+  return true;
+}
+
+template<>
+inline bool Matrix<std::complex<double> >::operator==(const Matrix<std::complex<double> >& rhs) const {
+  if (_lines != rhs._lines || _columns != rhs._columns)
+  {
+    return false;
+  }
+  for (size_t i = 0; i < _columns * _lines; i++)
+  {
+    double difference_re = abs((double)_Matrixptr[i].real() - (double)rhs._Matrixptr[i].real());
+    double difference_im = abs((double)_Matrixptr[i].imag() - (double)rhs._Matrixptr[i].imag());
+    if (difference_re > epsilon || difference_im > epsilon)
+    {
+      return false;
+    }
+  }
+  return true;
+}
+
+
+template <typename T>
+std::ostream& operator<<(std::ostream& os, const Matrix<T>& Matrix)
+{
+  os << "\n";
+  for (size_t i = 0; i < Matrix.getlines(); i++) {
+    for (size_t j = 0; j < Matrix.getcolumns(); j++) {
+      os << Matrix(i, j)<<" ";
+    }
+    os << "\n";
+  }
+  return os;
+}
 
 int main() {
 	cout << "Helloworld";
 	cout << "\nvivod\n";
   Matrix<complex<double>>test(2, 4, complex<double>(2.3,15), complex<double>(4.8, 2.3));
 	Matrix<complex<double>>test1(test);
-	test1.vivod();
+  cout << test1;
 	cout <<endl<< "2 line 2 column = " << test(1, 1) <<endl;
   Matrix<complex<double>>test2(2, 4, complex<double>(1.1, 22), complex<double>(3.2, 5.8));
-  test2 = test - test2;
-  test2.vivod();
+  test2 = test1/2;
+  cout << test2;
+  cout << "\n" << (test2 != test1);
+  cout << "\n" << test2.trace();
   //Matrix<int>result = test1/2;
 //	result.vivod();
 	return 0;
