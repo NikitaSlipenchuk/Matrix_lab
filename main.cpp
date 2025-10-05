@@ -274,11 +274,94 @@ std::ostream& operator<<(std::ostream& os, const Matrix<T>& Matrix)
   }
   return os;
 }
+// Альтернативная версия LU-разложения (более классическая)
+template<typename T>
+Matrix<T>luDecompositionClassicL(const Matrix<T>& A) {
+  if (A.getlines() != A.getcolumns()) {
+    throw std::invalid_argument("LU decomposition requires square matrix");
+  }
+
+  size_t n = A.getlines();
+  Matrix<T> L(n, n, T(0));
+  Matrix<T> U(n, n, T(0));
+
+  for (size_t i = 0; i < n; i++) {
+    // Верхняя треугольная U (строка i)
+    for (size_t j = i; j < n; j++) {
+      T sum = T(0);
+      for (size_t k = 0; k < i; k++) {
+        sum += L(i, k) * U(k, j);
+      }
+      U(i, j) = A(i, j) - sum;
+    }
+
+    // Нижняя треугольная L (столбец i)
+    for (size_t j = i; j < n; j++) {
+      if (i == j) {
+        L(i, i) = T(1);
+      }
+      else {
+        T sum = T(0);
+        for (size_t k = 0; k < i; k++) {
+          sum += L(j, k) * U(k, i);
+        }
+        if (U(i, i) == T(0)) {
+          throw std::runtime_error("Matrix is singular");
+        }
+        L(j, i) = (A(j, i) - sum) / U(i, i);
+      }
+    }
+  }
+
+  return L;
+}
+
+// Альтернативная версия LU-разложения (более классическая)
+template<typename T>
+Matrix<T> luDecompositionClassicR(const Matrix<T>& A) {
+  if (A.getlines() != A.getcolumns()) {
+    throw std::invalid_argument("LU decomposition requires square matrix");
+  }
+
+  size_t n = A.getlines();
+  Matrix<T> L(n, n, T(0));
+  Matrix<T> U(n, n, T(0));
+
+  for (size_t i = 0; i < n; i++) {
+    // Верхняя треугольная U (строка i)
+    for (size_t j = i; j < n; j++) {
+      T sum = T(0);
+      for (size_t k = 0; k < i; k++) {
+        sum += L(i, k) * U(k, j);
+      }
+      U(i, j) = A(i, j) - sum;
+    }
+
+    // Нижняя треугольная L (столбец i)
+    for (size_t j = i; j < n; j++) {
+      if (i == j) {
+        L(i, i) = T(1);
+      }
+      else {
+        T sum = T(0);
+        for (size_t k = 0; k < i; k++) {
+          sum += L(j, k) * U(k, i);
+        }
+        if (U(i, i) == T(0)) {
+          throw std::runtime_error("Matrix is singular");
+        }
+        L(j, i) = (A(j, i) - sum) / U(i, i);
+      }
+    }
+  }
+
+  return U;
+}
 
 int main() {
 	cout << "Helloworld";
 	cout << "\nvivod\n";
-  Matrix<complex<double>>test1(2, 4, complex<double>(2.3,5.8), complex<double>(1.5,9.3)), test2(4, 3, complex<double>(2.3, 11.3), complex<double>(4.5, 6.7));
+  Matrix<complex<double>>test1(4, 4, complex<double>(2.3,5.8), complex<double>(1.5,9.3)), test2(4, 3, complex<double>(2.3, 11.3), complex<double>(4.5, 6.7));
 	Matrix<int>test;
   cout << test1;
   cout << test2;
@@ -286,5 +369,11 @@ int main() {
   cout << "\n" << test2.trace();
   Matrix<complex<double>>result = test1 * test2;
   cout << result;
+  cout << "test Decomposistion"<<endl;
+  Matrix < complex<double>> L = luDecompositionClassicL(test1), R = luDecompositionClassicR(test1);
+  cout << L;
+  cout << R;
+  cout << L * R;
+  cout << test1;
 	return 0;
 }
