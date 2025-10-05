@@ -114,6 +114,9 @@ public:
   }
 
   Matrix& operator=(const Matrix& other) {
+    if (_lines != other.getlines() || _columns != other.getcolumns()) {
+      throw invalid_argument("Different size of Matrix");
+    }
     if (this != &other) {
       delete[] _Matrixptr;
       _Matrixptr = nullptr;
@@ -140,27 +143,42 @@ public:
   }
 
   T operator()(int line, int column) const {
+    if (line < 0 || line >= _lines || column < 0 || column >= _columns) {
+      throw std::range_error("Index out of range");
+    }
     return _Matrixptr[line * _columns + column];
   }
 
 	T& operator()(int line, int column) {
-		return _Matrixptr[line * _columns + column];
+    if (line < 0 || line >= _lines || column < 0 || column >= _columns) {
+      throw std::range_error("Index out of range");
+    }
+    return _Matrixptr[line * _columns + column];
 	}
 
   Matrix& operator+=(const Matrix rhs) {
-      for (size_t i = 0; i < _lines * _columns; i++) {
+    if (_lines != rhs.getlines() || _columns != rhs.getcolumns()) {
+      throw invalid_argument("Different size of Matrix");
+    }
+    for (size_t i = 0; i < _lines * _columns; i++) {
         _Matrixptr[i] += rhs._Matrixptr[i];
       }
       return *this;
   }
 
 Matrix operator+(const Matrix& rhs) {
+  if (_lines != rhs.getlines() || _columns != rhs.getcolumns()) {
+    throw invalid_argument("Different size of Matrix");
+  }
   Matrix result(*this);
   result += rhs;
   return result;
 }
 
 Matrix& operator-=(const Matrix rhs) {
+  if (_lines != rhs.getlines() || _columns != rhs.getcolumns()) {
+    throw invalid_argument("Different size of Matrix");
+  }
   for (size_t i = 0; i < _lines * _columns; i++) {
     _Matrixptr[i] -= rhs._Matrixptr[i];
   }
@@ -168,6 +186,9 @@ Matrix& operator-=(const Matrix rhs) {
 }
 
 Matrix operator-(const Matrix& rhs) {
+  if (_lines != rhs.getlines() || _columns != rhs.getcolumns()) {
+    throw invalid_argument("Different size of Matrix");
+  }
   Matrix result(*this);
   result -= rhs;
   return result;
@@ -187,6 +208,9 @@ friend Matrix operator*(T scalar, const Matrix& rhs) {
 
 
 Matrix operator/(T scalar) const {
+  if (scalar == 0) {
+    throw invalid_argument("Division by zero");
+  }
   Matrix result(_lines, _columns,0);
   for (int i = 0; i < _lines * _columns; i++) {
     result._Matrixptr[i] = _Matrixptr[i] / scalar;
@@ -208,6 +232,9 @@ T trace() const {
 
 
 Matrix operator*(const Matrix& rhs) const {
+  if (_columns != rhs._lines) {
+    throw invalid_argument("Uncorrect size of matrix for multiply");
+  }
   Matrix<T>result(_lines, rhs._columns, 0);
   for (size_t i = 0; i < _lines; i++) {
     for (size_t j = 0; j < rhs._columns; j++) {
@@ -225,7 +252,7 @@ Matrix operator*(const Matrix& rhs) const {
 	}
 };
 
-template<>
+
 inline bool Matrix<std::complex<float> >::operator==(const Matrix<std::complex<float> >& rhs) const {
   if (_lines!=rhs._lines || _columns!=rhs._columns)
   {
@@ -243,7 +270,6 @@ inline bool Matrix<std::complex<float> >::operator==(const Matrix<std::complex<f
   return true;
 }
 
-template<>
 inline bool Matrix<std::complex<double> >::operator==(const Matrix<std::complex<double> >& rhs) const {
   if (_lines != rhs._lines || _columns != rhs._columns)
   {
@@ -276,7 +302,7 @@ std::ostream& operator<<(std::ostream& os, const Matrix<T>& Matrix)
 }
 // Альтернативная версия LU-разложения (более классическая)
 template<typename T>
-Matrix<T>luDecompositionClassicL(const Matrix<T>& A) {
+Matrix<T>luDecompositionL(const Matrix<T>& A) {
   if (A.getlines() != A.getcolumns()) {
     throw std::invalid_argument("LU decomposition requires square matrix");
   }
@@ -312,13 +338,12 @@ Matrix<T>luDecompositionClassicL(const Matrix<T>& A) {
       }
     }
   }
-
   return L;
 }
 
 // Альтернативная версия LU-разложения (более классическая)
 template<typename T>
-Matrix<T> luDecompositionClassicR(const Matrix<T>& A) {
+Matrix<T> luDecompositionR(const Matrix<T>& A) {
   if (A.getlines() != A.getcolumns()) {
     throw std::invalid_argument("LU decomposition requires square matrix");
   }
@@ -358,22 +383,25 @@ Matrix<T> luDecompositionClassicR(const Matrix<T>& A) {
   return U;
 }
 
+void example() {
+  Matrix<double>A(3,4,13.2,67.5), B(3,4,5.1,14.4);
+  cout <<"A=" << A << "B=" << B;
+  cout << "A+B=" << A + B;
+  cout << "A-B=" << A - B;
+  cout << "A*5=" << A * 5;
+  cout << "A/3" << A / 3;
+  Matrix<double>C(4, 3, 1.4, 7.8);
+  cout << "C=" << C;
+  cout << "A*C=" << A * C;
+  cout << "trace of C=" << C.trace()<<"\n";
+  cout << "element 1,1 =" << C(1, 1)<<"\n";
+  Matrix<double>F(3, 3, 1.4, 10.8);
+  cout <<"F=" << F;
+  cout << "In my task L=" << luDecompositionL(F);
+  cout << "R=" << luDecompositionR(F);
+  cout << "Input=" << luDecompositionL(F) * luDecompositionR(F);
+}
+
 int main() {
-	cout << "Helloworld";
-	cout << "\nvivod\n";
-  Matrix<complex<double>>test1(4, 4, complex<double>(2.3,5.8), complex<double>(1.5,9.3)), test2(4, 3, complex<double>(2.3, 11.3), complex<double>(4.5, 6.7));
-	Matrix<int>test;
-  cout << test1;
-  cout << test2;
-  cout << "\n" << (test2 != test1);
-  cout << "\n" << test2.trace();
-  Matrix<complex<double>>result = test1 * test2;
-  cout << result;
-  cout << "test Decomposistion"<<endl;
-  Matrix < complex<double>> L = luDecompositionClassicL(test1), R = luDecompositionClassicR(test1);
-  cout << L;
-  cout << R;
-  cout << L * R;
-  cout << test1;
-	return 0;
+  example();
 }
