@@ -2,6 +2,7 @@
 #include <format>
 #include <random>
 #include <stdexcept>
+#include <complex>
 
 using namespace std;
 
@@ -9,44 +10,71 @@ template <typename T>
 
 class Matrix {
 private:
-	T* _Matrixptr;
-	int _lines;
-	int _columns;
+  T* _Matrixptr;
+  size_t _lines;
+  size_t _columns;
 public:
-	Matrix() :_Matrixptr(nullptr), _lines(0), _columns(0) {}
+  Matrix() :_Matrixptr(nullptr), _lines(0), _columns(0) {}
 
-  template<typename... Args>
-  Matrix(int lines, int columns, Args... args) : _lines(lines), _columns(columns) {
+  Matrix(size_t lines, size_t columns, T value) : _lines(lines), _columns(columns) {
     _Matrixptr = new T[_lines * _columns];
-    if constexpr(sizeof...(args) == 0) { //constexpr because args work in time to compilation
-      for (int i = 0; i < lines * columns; i++) {
-        _Matrixptr[i] = T();
-      }
-    }
-    else {
-      T temparray[] = { args... };
-      size_t args_count = sizeof...(args);
-      size_t total_size = lines * columns;
-
-      for (int i = 0; i < total_size; i++) {
-        if (i < args_count) {
-          _Matrixptr[i] = temparray[i];
-        }
-        else {
-          _Matrixptr[i] = T(); // Заполняем оставшиеся значения
-        }
-      }
+    for (size_t i = 0; i < lines * columns; i++) {
+      _Matrixptr[i] = value;
     }
   }
 
-	Matrix(bool flag, int lines, int columns,int inf, int sup) : _lines(lines), _columns(columns) { //only int
+	Matrix(size_t lines, size_t columns,int inf, int sup) : _lines(lines), _columns(columns) { //for  int
 		_Matrixptr = new T[lines * columns];
-		default_random_engine e;
-		uniform_int_distribution d(inf, sup);
-		for (int i = 0; i < lines * columns; i++) {
-			_Matrixptr[i] = d(e);
-		}
+    std::random_device engine;
+    std::uniform_int_distribution distribution(std::min(inf, sup), std::max(inf, sup));
+    for (size_t i = 0; i < columns*lines; i++)
+    {
+      _Matrixptr[i] = distribution(engine);
+    }
 	}
+
+  Matrix(size_t lines, size_t columns, float inf, float sup) : _lines(lines), _columns(columns) { //for  float
+    _Matrixptr = new T[lines * columns];
+    std::random_device engine;
+    std::uniform_real_distribution distribution(std::min(inf, sup), std::max(inf, sup));
+    for (size_t i = 0; i < columns * lines; i++)
+    {
+      _Matrixptr[i] = distribution(engine);
+    }
+  }
+
+  Matrix(size_t lines, size_t columns, double inf, double sup) : _lines(lines), _columns(columns) { //for  float
+    _Matrixptr = new T[lines * columns];
+    std::random_device engine;
+    std::uniform_real_distribution distribution(std::min(inf, sup), std::max(inf, sup));
+    for (size_t i = 0; i < columns * lines; i++)
+    {
+      _Matrixptr[i] = distribution(engine);
+    }
+  }
+
+  Matrix(size_t lines, size_t columns, complex<float> inf, complex<float> sup) : _lines(lines), _columns(columns) { //for  complex<float>
+    _Matrixptr = new T[lines*columns];
+    std::random_device engine;
+    std::uniform_real_distribution distributionre(std::min(sup.real(), inf.real()), std::max(sup.real(), inf.real()));
+    std::uniform_real_distribution distributionim(std::min(sup.imag(), inf.imag()), std::max(sup.imag(), inf.imag()));
+    for (size_t i = 0; i < columns*lines; i++)
+    {
+      _Matrixptr[i] = std::complex<float>(distributionre(engine), distributionim(engine));
+    }
+  }
+
+
+  Matrix(size_t lines, size_t columns, complex<double> inf, complex<double> sup) : _lines(lines), _columns(columns) { //for  complex<double>
+    _Matrixptr = new T[lines * columns];
+    std::random_device engine;
+    std::uniform_real_distribution distributionre(std::min(sup.real(), inf.real()), std::max(sup.real(), inf.real()));
+    std::uniform_real_distribution distributionim(std::min(sup.imag(), inf.imag()), std::max(sup.imag(), inf.imag()));
+    for (size_t i = 0; i < columns * lines; i++)
+    {
+      _Matrixptr[i] = std::complex<double>(distributionre(engine), distributionim(engine));
+    }
+  }
 
 	Matrix(const Matrix& other)
 		: _lines(other._lines), _columns(other._columns) {
@@ -55,10 +83,11 @@ public:
 			return;
 		}
 		_Matrixptr = new T[_lines * _columns];
-		for (int i = 0; i < _lines * _columns; i++) {
+		for (size_t i = 0; i < _lines * _columns; i++) {
 			_Matrixptr[i] = other._Matrixptr[i];
 		}
 	}
+
 
   int getlines() const {
     return _lines;
@@ -74,9 +103,9 @@ public:
 
 	void vivod() const {
 		cout << "\n";
-		int temp = 0;
-		for (int i = 0; i < _lines * _columns; i++) {
-			cout << format("{} ", _Matrixptr[i]);
+    size_t temp = 0;
+		for (size_t i = 0; i < _lines * _columns; i++) {
+      cout << _Matrixptr[i] << " ";
 			temp++;
 			if (temp >= _columns) {
 				cout << format("\n");
@@ -86,7 +115,7 @@ public:
 	}
 
   Matrix& operator+=(const Matrix rhs) {
-      for (int i = 0; i < _lines * _columns; i++) {
+      for (size_t i = 0; i < _lines * _columns; i++) {
         _Matrixptr[i] += rhs._Matrixptr[i];
       }
       return *this;
@@ -99,7 +128,7 @@ Matrix operator+(const Matrix& rhs) {
 }
 
 Matrix& operator-=(const Matrix rhs) {
-  for (int i = 0; i < _lines * _columns; i++) {
+  for (size_t i = 0; i < _lines * _columns; i++) {
     _Matrixptr[i] -= rhs._Matrixptr[i];
   }
   return *this;
@@ -113,7 +142,7 @@ Matrix operator-(const Matrix& rhs) {
 
 Matrix operator*(T scalar) const {
   Matrix result(_lines, _columns);
-  for (int i = 0; i < _lines * _columns; i++) {
+  for (size_t i = 0; i < _lines * _columns; i++) {
     result._Matrixptr[i] = _Matrixptr[i] * scalar;
   }
   return result;
@@ -123,6 +152,7 @@ friend Matrix operator*(T scalar, const Matrix& rhs) {
   return rhs * scalar; 
 }
 
+/*
 Matrix operator/(T scalar) const {
   Matrix result(_lines, _columns);
   for (int i = 0; i < _lines * _columns; i++) {
@@ -130,6 +160,7 @@ Matrix operator/(T scalar) const {
   }
   return result;
 }
+*/
 
 /*Matrix& operator*=(const Matrix& rhs) {
   Matrix result(_lines, rhs._columns);
@@ -165,13 +196,15 @@ Matrix operator/(T scalar) const {
 int main() {
 	cout << "Helloworld";
 	cout << "\nvivod\n";
-	Matrix<int>test(true,2,4,1,5);
-	Matrix<int>test1(test);
+  Matrix<complex<double>>test(2, 4, complex<double>(2.3,15), complex<double>(4.8, 2.3));
+	Matrix<complex<double>>test1(test);
 	test1.vivod();
-	cout << "3 line 1 column = " << test(1, 1);
+	cout <<endl<< "2 line 2 column = " << test(1, 1) <<endl;
+  Matrix<complex<double>>test2;
+  test2 = test + test1;
 	test1(1, 1) = 111;
-  test1.vivod();
-  Matrix<int>result = test1/2;
-	result.vivod();
+  test2.vivod();
+  //Matrix<int>result = test1/2;
+//	result.vivod();
 	return 0;
 }
