@@ -76,18 +76,35 @@ public:
     }
   }
 
-	Matrix(const Matrix& other)
-		: _lines(other._lines), _columns(other._columns) {
-		if (other._Matrixptr == nullptr) {
-			_Matrixptr = nullptr;
-			return;
-		}
-		_Matrixptr = new T[_lines * _columns];
-		for (size_t i = 0; i < _lines * _columns; i++) {
-			_Matrixptr[i] = other._Matrixptr[i];
-		}
-	}
+  Matrix(const Matrix& other)
+    : _lines(other._lines), _columns(other._columns) {
+    if (other._Matrixptr == nullptr) {
+      _Matrixptr = nullptr;
+      return;
+    }
+    _Matrixptr = new T[_lines * _columns];
+    for (size_t i = 0; i < _lines * _columns; i++) {
+      _Matrixptr[i] = other._Matrixptr[i];
+    }
+  }
 
+  Matrix& operator=(const Matrix& other) {
+    if (this != &other) {
+      delete[] _Matrixptr;
+      _Matrixptr = nullptr;
+
+      _lines = other._lines;
+      _columns = other._columns;
+
+      if (other._Matrixptr != nullptr && _lines > 0 && _columns > 0) {
+        _Matrixptr = new T[_lines * _columns];
+        for (size_t i = 0; i < _lines * _columns; i++) {
+          _Matrixptr[i] = other._Matrixptr[i];
+        }
+      }
+    }
+    return *this;
+  }
 
   int getlines() const {
     return _lines;
@@ -141,7 +158,7 @@ Matrix operator-(const Matrix& rhs) {
 }
 
 Matrix operator*(T scalar) const {
-  Matrix result(_lines, _columns);
+  Matrix result(_lines, _columns,0);
   for (size_t i = 0; i < _lines * _columns; i++) {
     result._Matrixptr[i] = _Matrixptr[i] * scalar;
   }
@@ -200,9 +217,8 @@ int main() {
 	Matrix<complex<double>>test1(test);
 	test1.vivod();
 	cout <<endl<< "2 line 2 column = " << test(1, 1) <<endl;
-  Matrix<complex<double>>test2;
-  test2 = test + test1;
-	test1(1, 1) = 111;
+  Matrix<complex<double>>test2(2, 4, complex<double>(1.1, 22), complex<double>(3.2, 5.8));
+  test2 = test - test2;
   test2.vivod();
   //Matrix<int>result = test1/2;
 //	result.vivod();
