@@ -14,7 +14,7 @@ Matrix<T> luDecompositionL(const Matrix<T>& A) {
   Matrix<T> U(n, n, T(0));
 
   for (size_t i = 0; i < n; i++) {
-    // Верхняя треугольная U (строка i)
+    // High triangle U (line i)
     for (size_t j = i; j < n; j++) {
       T sum = T(0);
       for (size_t k = 0; k < i; k++) {
@@ -23,7 +23,7 @@ Matrix<T> luDecompositionL(const Matrix<T>& A) {
       U(i, j) = A(i, j) - sum;
     }
 
-    // Нижняя треугольная L (столбец i)
+    // low triangle L (column i)
     for (size_t j = i; j < n; j++) {
       if (i == j) {
         L(i, i) = T(1);
@@ -54,7 +54,7 @@ Matrix<T> luDecompositionR(const Matrix<T>& A) {
   Matrix<T> U(n, n, T(0));
 
   for (size_t i = 0; i < n; i++) {
-    // Верхняя треугольная U (строка i)
+    // high triangle U (line i)
     for (size_t j = i; j < n; j++) {
       T sum = T(0);
       for (size_t k = 0; k < i; k++) {
@@ -63,7 +63,7 @@ Matrix<T> luDecompositionR(const Matrix<T>& A) {
       U(i, j) = A(i, j) - sum;
     }
 
-    // Нижняя треугольная L (столбец i)
+    // low triangle L (column i)
     for (size_t j = i; j < n; j++) {
       if (i == j) {
         L(i, i) = T(1);
