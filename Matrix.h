@@ -117,9 +117,6 @@ public:
   }
 
   Matrix& operator=(const Matrix& other) {
-    if (_lines != other.getlines() || _columns != other.getcolumns()) {
-      throw invalid_argument("Different size of Matrix");
-    }
     if (this != &other) {
       delete[] _Matrixptr;
       _Matrixptr = nullptr;
