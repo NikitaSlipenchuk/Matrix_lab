@@ -20,11 +20,13 @@ public:
   }
 
   LinkedList(size_t size) {
-    throw logic_error("Only natural numbers");
+    if (size <= 0) {
+      throw logic_error("Only natural numbers");
+    }
     head = new Node<T>(1);
     Node<T>* current = head;
     for (int i = 2; i <= size; i++) {
-      current->pNext = new Node<T>(i);
+      current->pNext = new Node<T>(i,nullptr,current);
       current = current->pNext;
     }
   }
@@ -44,6 +46,10 @@ public:
         current = current->pNext;
       }
     }
+  }
+
+  Node<T>* get_head() {
+    return this->head;
   }
 
   LinkedList& operator=(const LinkedList &list) {
@@ -156,6 +162,7 @@ public:
       Node<T>* buf = head;
       head = this->head->pNext;
       head->pPrevious = nullptr;
+      delete buf;
     }
   }
 
@@ -167,9 +174,13 @@ public:
     while (current->pNext != nullptr) {
       current = current->pNext;
     }
-    Node<T>* buf = current;
-    current = current->pPrevious;
-    current->pPrevious = nullptr;
+    if (current->pPrevious != nullptr) {
+      current->pPrevious->pNext = nullptr;
+    }
+    else {
+      head = nullptr;
+    }
+    delete current;
   }
 
   void delete_node(const T& data) {
@@ -195,6 +206,7 @@ public:
     }
   }
 
+
   ~LinkedList(){
     Node<T>* current = head;
     while (current != nullptr) {
@@ -205,11 +217,44 @@ public:
   }
 };
 
+template<typename T>
+void lucky_numbers(LinkedList<T> &list, size_t size) {
+  int rm_index = 2, buffer=0;
+  for (int i = 0; i < size; i++) {
+    if ((i + 1) % rm_index == 0) {
+      list[i] = 0;
+      buffer++;
+    }
+  }
+  size = size - buffer;
+  buffer = 0;
+  list.delete_node(0);
+  Node<T>*buf = list.get_head();
+  buf = buf->pNext;
+  rm_index = buf->data;
+  while (rm_index < size) {
+    for (int i = 0; i < size; i++) {
+      if ((i + 1) % rm_index == 0) {
+        list[i] = 0;
+        buffer++;
+      }
+    }
+    size = size - buffer;
+    buffer = 0;
+    list.delete_node(0);
+    buf = buf->pNext;
+    rm_index = buf->data;
+  }
+} 
+
 int main() {
-  
-  LinkedList<int>list(60);
-  for (int i = 0; i < 60; i++) {
+  cout << "hello workd";
+  LinkedList<int>list(25);
+  for (int i = 0; i < 25; i++) {
     cout << list[i] << endl;
   }
-
+  lucky_numbers(list, 25);
+  for (int i = 0; i < 8; i++) {
+    cout << list[i] << endl;
+  }
 }
