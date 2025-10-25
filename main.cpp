@@ -1,4 +1,5 @@
 #include <iostream>
+#include <stdexcept>
 using namespace std;
 
 template <typename T>
@@ -12,10 +13,35 @@ struct Node {
 template <typename T>
 class LinkedList {
 private:
-  Node<T> *head;
+  Node<T>* head;
 public:
   LinkedList() {
     head = nullptr;
+  }
+
+  LinkedList(const LinkedList &list) {
+    Node<T> *current = list.head;
+    head = new Node<T>(list.head->data);
+    current = current->pNext;
+    Node<T>* currentthis = head;
+    while (current != nullptr) {
+      currentthis->pNext = new Node<T>(current->data,nullptr,currentthis);
+      currentthis = currentthis->pNext;
+      current = current->pNext;
+    }
+  }
+
+  LinkedList& operator=(const LinkedList &list) {
+    Node<T>* current = list.head;
+    head = new Node<T>(list.head->data);
+    current = current->pNext;
+    Node<T>* currentthis = head;
+    while (current != nullptr) {
+      currentthis->pNext = new Node<T>(current->data, nullptr, currentthis);
+      currentthis = currentthis->pNext;
+      current = current->pNext;
+    }
+    return *this;
   }
 
   void push_head(T data) {
@@ -28,55 +54,112 @@ public:
     }
   }
 
+  void push_head(const LinkedList &lhs) {
+    if (lhs.head == nullptr) return;  // защита от пустого списка
+    LinkedList<T>buffer(lhs);
+    if (head == nullptr) {
+      head = buffer.head;
+      buffer.head = nullptr;  // предотвращаем удаление в деструкторе buffer
+      return;
+    }
+    Node<T>* current = buffer.head;
+    while (current->pNext != nullptr) {
+      current = current->pNext;
+    }
+    current->pNext = head;
+    head->pPrevious = current;
+    head = buffer.head;
+    buffer.head = nullptr;
+  }
+
   void  push_tail(T data) {
     if (head == nullptr) {
       head = new Node<T>(data);
     }
     else {
-      Node<T> *current = head;
+      Node<T>* current = head;
       while (current->pNext != nullptr) {
         current = current->pNext;
       }
-      current->pNext = new Node<T>(data,nullptr,current);
+      current->pNext = new Node<T>(data, nullptr, current);
     }
   }
 
-  T operator[](size_t index) {
+  void push_tail(const LinkedList& rhs) {
+    if (rhs.head == nullptr) return;
+    LinkedList<T>buffer(rhs);
+    if (head == nullptr) {
+      head = buffer.head;
+      buffer.head = nullptr;
+      return;
+    }
+    Node<T>* current = head;
+    while (current->pNext != nullptr) {
+      current = current->pNext;
+    }
+    current->pNext = buffer.head;
+    buffer.head->pPrevious = current;
+    buffer.head = nullptr;
+  }
+
+  T operator[](size_t index) const {
     Node<T>* current = head;
     size_t cnt = 0;
-    while (head->pNext != nullptr) {
+    while (current != nullptr) {
       if (cnt == index) {
         return current->data;
       }
       cnt++;
       current = current->pNext;
     }
-    return NULL;
+    throw out_of_range("Index out of range");
   }
 
   T& operator[](size_t index) {
     Node<T>* current = head;
     size_t cnt = 0;
-    while (head->pNext != nullptr) {
+    while (current!= nullptr) {
       if (cnt == index) {
         return current->data;
       }
       cnt++;
       current = current->pNext;
     }
-    return NULL;
+    throw out_of_range("Index out of range");
+  }
+
+  void pop_head() {
+    if (head == nullptr) {
+      throw logic_error("There is not elements in list");
+    }
+    if (head->pNext = nullptr) {
+      head = nullptr;
+      return;
+    }
+    Node<T>*buf = head;
+    head = this->head->pNext;
+    head->pPrevious = nullptr;
+    delete buf;
   }
 
   ~LinkedList(){
-    delete [] head;
+    Node<T>* current = head;
+    while (current != nullptr) {
+      Node<T>* next = current->pNext;
+      delete current;
+      current = next;
+    }
   }
 };
 
 int main() {
   cout << "hello world";
-  LinkedList<int>list;
-  list.push_head(12);
-  list.push_tail(24);
-  list.push_head(222);
-  cout << list[1];
+  LinkedList<int>list1, list2;
+  list1.push_head(12);
+  list1.push_tail(24);
+  list2.push_head(222);
+  list1.pop_head();
+  list2 = list1;
+  cout << list1[0];
+
 }
