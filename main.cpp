@@ -19,6 +19,16 @@ public:
     head = nullptr;
   }
 
+  LinkedList(size_t size) {
+    throw logic_error("Only natural numbers");
+    head = new Node<T>(1);
+    Node<T>* current = head;
+    for (int i = 2; i <= size; i++) {
+      current->pNext = new Node<T>(i);
+      current = current->pNext;
+    }
+  }
+
   LinkedList(const LinkedList &list) {
     if (list.head == nullptr) {
       head = nullptr;
@@ -146,7 +156,42 @@ public:
       Node<T>* buf = head;
       head = this->head->pNext;
       head->pPrevious = nullptr;
-      delete buf;
+    }
+  }
+
+  void pop_tail() {
+    if (head == nullptr) {
+      throw logic_error("There is not elements in list");
+    }
+    Node<T>* current = head;
+    while (current->pNext != nullptr) {
+      current = current->pNext;
+    }
+    Node<T>* buf = current;
+    current = current->pPrevious;
+    current->pPrevious = nullptr;
+  }
+
+  void delete_node(const T& data) {
+    Node<T>* current = head;
+    while (current != nullptr) {
+      if (current->data == data) {
+        Node<T>* nodeToDelete = current;
+        if (current->pPrevious != nullptr) {
+          current->pPrevious->pNext = current->pNext;
+        }
+        else {
+          head = current->pNext;
+        }
+        if (current->pNext != nullptr) {
+          current->pNext->pPrevious = current->pPrevious;
+        }
+        current = current->pNext;
+        delete nodeToDelete;
+      }
+      else {
+        current = current->pNext;
+      }
     }
   }
 
@@ -161,9 +206,10 @@ public:
 };
 
 int main() {
-  cout << "hello world";
-  LinkedList<int>list1;
-  list1.push_head(12);
-  LinkedList<int>list2(list1);
-  list2.pop_head();
+  
+  LinkedList<int>list(60);
+  for (int i = 0; i < 60; i++) {
+    cout << list[i] << endl;
+  }
+
 }
