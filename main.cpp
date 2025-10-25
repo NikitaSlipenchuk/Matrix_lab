@@ -20,14 +20,19 @@ public:
   }
 
   LinkedList(const LinkedList &list) {
-    Node<T> *current = list.head;
-    head = new Node<T>(list.head->data);
-    current = current->pNext;
-    Node<T>* currentthis = head;
-    while (current != nullptr) {
-      currentthis->pNext = new Node<T>(current->data,nullptr,currentthis);
-      currentthis = currentthis->pNext;
+    if (list.head == nullptr) {
+      head = nullptr;
+    }
+    else {
+      Node<T>* current = list.head;
+      head = new Node<T>(list.head->data);
       current = current->pNext;
+      Node<T>* currentthis = head;
+      while (current != nullptr) {
+        currentthis->pNext = new Node<T>(current->data, nullptr, currentthis);
+        currentthis = currentthis->pNext;
+        current = current->pNext;
+      }
     }
   }
 
@@ -132,14 +137,17 @@ public:
     if (head == nullptr) {
       throw logic_error("There is not elements in list");
     }
-    if (head->pNext = nullptr) {
+    if (head->pNext == nullptr) {
+      Node<T>* buf = head;
       head = nullptr;
-      return;
+      delete buf;
     }
-    Node<T>*buf = head;
-    head = this->head->pNext;
-    head->pPrevious = nullptr;
-    delete buf;
+    else {
+      Node<T>* buf = head;
+      head = this->head->pNext;
+      head->pPrevious = nullptr;
+      delete buf;
+    }
   }
 
   ~LinkedList(){
@@ -154,12 +162,8 @@ public:
 
 int main() {
   cout << "hello world";
-  LinkedList<int>list1, list2;
+  LinkedList<int>list1;
   list1.push_head(12);
-  list1.push_tail(24);
-  list2.push_head(222);
-  list1.pop_head();
-  list2 = list1;
-  cout << list1[0];
-
+  LinkedList<int>list2(list1);
+  list2.pop_head();
 }
