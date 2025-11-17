@@ -30,22 +30,47 @@ stats select_sort(LinkedList<int>& list) {
   return st;
 }
 
+stats comb_sort(vector<int>&vec) {
+  stats st;
+  int n = vec.size();
+  int step = n;
+  bool swapped = true;
+  while (step > 1 || swapped) {
+    step = (step * 10) / 13;
+    if (step < 1) {
+      step = 1;
+    }
+    swapped = false;
+    for (int i = 0; i + step < n; i++) {
+      if (vec[i] > vec[i + step]) {
+        swap(vec[i], vec[i + step]);
+        swapped = true;
+        st.copy_count += 3;
+      }
+      st.comporation_count += 1;
+    }
+  }
+  return st;
+}
+
 
 
 int main() {
-  LinkedList<int>list(20);
+  vector<int>vec(20);
   for (int i = 0; i < 20; i++) {
-    list[i] = rand() % 100;
+    vec[i] = rand() % 150;
   }
+  cout << "mas= ";
   for (int i = 0; i < 20; i++) {
-    cout << list[i] << " ";
+    cout << vec[i] << " ";
   }
-  cout << endl << "Stat  inf:" << endl;
   stats st;
-  st = select_sort(list);
+  st = comb_sort(vec);
+  cout <<endl<< "mas= ";
   for (int i = 0; i < 20; i++) {
-    cout << list[i] << " ";
+    cout << vec[i] << " ";
   }
-  cout << endl << st.comporation_count << endl;
-  cout << endl << st.copy_count << endl;
+  cout <<endl<< st.comporation_count<<endl;
+  cout <<endl<<st.copy_count;
+
 }
