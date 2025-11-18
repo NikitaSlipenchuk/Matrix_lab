@@ -2,11 +2,18 @@
 #include <vector>
 #include <random>
 #include "LinkedList.h"
+#include <chrono> 
 using namespace std;
 
 struct stats {
   size_t comparison_count = 0;
   size_t copy_count = 0;
+
+  stats& operator+=(const stats& other) {
+    comparison_count += other.comparison_count;
+    copy_count += other.copy_count;
+    return *this;
+  }
 };
 
 stats select_sort(LinkedList<int>& list) {
@@ -31,7 +38,7 @@ stats select_sort(LinkedList<int>& list) {
   return st;
 }
 
-stats comb_sort(vector<int>&vec) {
+stats comb_sort(vector<int>& vec) {
   stats st;
   int n = vec.size();
   int step = n;
@@ -73,7 +80,7 @@ void distribute(const vector<int>& input, vector<int>& start_to_end, vector<int>
         }
       }
     }
-    else {  
+    else {
       end_to_start.push_back(input[j--]);
       st.copy_count++;
       while (i <= j && j >= 0) {
@@ -171,27 +178,173 @@ stats sort_natural_two_way_merge(vector<int>& arr) {
 }
 
 
+void test_random_arrays_task3() {
+  vector<int> sizes = { 1000, 2000, 3000, 4000, 5000 };
+  unsigned seed = chrono::system_clock::now().time_since_epoch().count();
+  cout << "=== ÑËÓ×ÀÉÍÛÅ ÌÀÑÑÈÂÛ (ñðåäíåå çà 100 çàïóñêîâ) ===" << endl;
+  cout << "Ðàçìåð\tÑðàâíåíèÿ\tÊîïèðîâàíèÿ" << endl;
+  for (int size : sizes) {
+    stats total_stats;
+    for (int i = 0; i < 100; i++) {
+      vector<int> vec(size);
+      mt19937 generator(seed + i);
+      uniform_int_distribution<int> distribution(1, size * 10);
+
+      for (int j = 0; j < size; j++) {
+        vec[j] = distribution(generator);
+      }
+      vector<int> vec_copy = vec;
+      stats current_stats = sort_natural_two_way_merge(vec_copy);
+      total_stats += current_stats;
+    }
+    double avg_comparisons = static_cast<double>(total_stats.comparison_count) / 100;
+    double avg_copies = static_cast<double>(total_stats.copy_count) / 100;
+    cout << size << "\t" << avg_comparisons << "\t" << avg_copies << endl;
+  }
+}
+
+void test_sorted_arrays_task3() {
+  vector<int> sizes = { 1000, 2000, 3000, 4000, 5000 };
+  cout << "\n=== ÎÒÑÎÐÒÈÐÎÂÀÍÍÛÅ ÌÀÑÑÈÂÛ ===" << endl;
+  cout << "Ðàçìåð\tÑðàâíåíèÿ\tÊîïèðîâàíèÿ" << endl;
+  for (int size : sizes) {
+    vector<int> vec(size);
+    for (int i = 0; i < size; i++) {
+      vec[i] = i;
+    }
+    stats st = sort_natural_two_way_merge(vec);
+    cout << size << "\t" << st.comparison_count << "\t" << st.copy_count << endl;
+  }
+}
+
+void test_reverse_sorted_arrays_task3() {
+  vector<int> sizes = { 1000, 2000, 3000, 4000, 5000 };
+  cout << "\n=== ÎÁÐÀÒÍÎ ÎÒÑÎÐÒÈÐÎÂÀÍÍÛÅ ÌÀÑÑÈÂÛ ===" << endl;
+  cout << "Ðàçìåð\tÑðàâíåíèÿ\tÊîïèðîâàíèÿ" << endl;
+  for (int size : sizes) {
+    vector<int> vec(size);
+    for (int i = 0; i < size; i++) {
+      vec[i] = size - i;
+    }
+    stats st = sort_natural_two_way_merge(vec);
+    cout << size << "\t" << st.comparison_count << "\t" << st.copy_count << endl;
+  }
+}
+
+void test_random_arrays_task2() {
+  vector<int> sizes = { 1000, 2000, 3000, 4000, 5000 };
+  unsigned seed = chrono::system_clock::now().time_since_epoch().count();
+  cout << "=== ÑËÓ×ÀÉÍÛÅ ÌÀÑÑÈÂÛ (ñðåäíåå çà 100 çàïóñêîâ) ===" << endl;
+  cout << "Ðàçìåð\tÑðàâíåíèÿ\tÊîïèðîâàíèÿ" << endl;
+  for (int size : sizes) {
+    stats total_stats;
+    for (int i = 0; i < 100; i++) {
+      vector<int> vec(size);
+      mt19937 generator(seed + i); 
+      uniform_int_distribution<int> distribution(1, size * 10);
+      for (int j = 0; j < size; j++) {
+        vec[j] = distribution(generator);
+      }
+      vector<int> vec_copy = vec;
+      stats current_stats = comb_sort(vec_copy);
+      total_stats += current_stats;
+    }
+    double avg_comparisons = static_cast<double>(total_stats.comparison_count) / 100;
+    double avg_copies = static_cast<double>(total_stats.copy_count) / 100;
+    cout << size << "\t" << avg_comparisons << "\t" << avg_copies << endl;
+  }
+}
+
+void test_sorted_arrays_task2() {
+  vector<int> sizes = { 1000, 2000, 3000, 4000, 5000 };
+  cout << "\n=== ÎÒÑÎÐÒÈÐÎÂÀÍÍÛÅ ÌÀÑÑÈÂÛ ===" << endl;
+  cout << "Ðàçìåð\tÑðàâíåíèÿ\tÊîïèðîâàíèÿ" << endl;
+  for (int size : sizes) {
+    vector<int> vec(size);
+    for (int i = 0; i < size; i++) {
+      vec[i] = i;
+    }
+    stats st = comb_sort(vec);
+    cout << size << "\t" << st.comparison_count << "\t" << st.copy_count << endl;
+  }
+}
+
+void test_reverse_sorted_arrays_task2() {
+  vector<int> sizes = { 1000, 2000, 3000, 4000, 5000 };
+  cout << "\n=== ÎÁÐÀÒÍÎ ÎÒÑÎÐÒÈÐÎÂÀÍÍÛÅ ÌÀÑÑÈÂÛ ===" << endl;
+  cout << "Ðàçìåð\tÑðàâíåíèÿ\tÊîïèðîâàíèÿ" << endl;
+  for (int size : sizes) {
+    vector<int> vec(size);
+    for (int i = 0; i < size; i++) {
+      vec[i] = size - i;
+    }
+    stats st = comb_sort(vec);
+    cout << size << "\t" << st.comparison_count << "\t" << st.copy_count << endl;
+  }
+}
+
+void test_random_arrays_task1() {
+  vector<int> sizes = { 1000, 2000, 3000, 4000, 5000 };
+  unsigned seed = chrono::system_clock::now().time_since_epoch().count();
+  cout << "=== ÑËÓ×ÀÉÍÛÅ ÌÀÑÑÈÂÛ (ñðåäíåå çà 100 çàïóñêîâ) ===" << endl;
+  cout << "Ðàçìåð\tÑðàâíåíèÿ\tÊîïèðîâàíèÿ" << endl;
+  for (int size : sizes) {
+    stats total_stats;
+    for (int i = 0; i < 100; i++) {
+      LinkedList<int>list(size);
+      mt19937 generator(seed + i); 
+      uniform_int_distribution<int> distribution(1, size * 10);
+      for (int j = 0; j < size; j++) {
+        list[j] = distribution(generator);
+      }
+      LinkedList<int> list_copy = list;
+      stats current_stats = select_sort(list_copy);
+      total_stats += current_stats;
+    }
+    double avg_comparisons = static_cast<double>(total_stats.comparison_count) / 100;
+    double avg_copies = static_cast<double>(total_stats.copy_count) / 100;
+    cout << size << "\t" << avg_comparisons << "\t" << avg_copies << endl;
+  }
+}
+
+void test_sorted_arrays_task1() {
+  vector<int> sizes = { 1000, 2000, 3000, 4000, 5000 };
+  cout << "\n=== ÎÒÑÎÐÒÈÐÎÂÀÍÍÛÅ ÌÀÑÑÈÂÛ ===" << endl;
+  cout << "Ðàçìåð\tÑðàâíåíèÿ\tÊîïèðîâàíèÿ" << endl;
+  for (int size : sizes) {
+    LinkedList<int> list(size);
+    for (int i = 0; i < size; i++) {
+      list[i] = i;
+    }
+    stats st = select_sort(list);
+    cout << size << "\t" << st.comparison_count << "\t" << st.copy_count << endl;
+  }
+}
+
+void test_reverse_sorted_arrays_task1() {
+  vector<int> sizes = { 1000, 2000, 3000, 4000, 5000 };
+  cout << "\n=== ÎÁÐÀÒÍÎ ÎÒÑÎÐÒÈÐÎÂÀÍÍÛÅ ÌÀÑÑÈÂÛ ===" << endl;
+  cout << "Ðàçìåð\tÑðàâíåíèÿ\tÊîïèðîâàíèÿ" << endl;
+  for (int size : sizes) {
+    LinkedList<int> list(size);
+    for (int i = 0; i < size; i++) {
+      list[i] = size - i;
+    }
+    stats st = select_sort(list);
+    cout << size << "\t" << st.comparison_count << "\t" << st.copy_count << endl;
+  }
+}
 
 int main() {
-  vector<int>vec(30);
-  for (int i = 0; i < 100; i++) {
-    random_device engine;
-    uniform_int_distribution distribution(1, 400);
-    for (int i = 0; i < 30; i++)
-    {
-      vec[i] = distribution(engine);
-    }
-    cout <<endl << "mas= ";
-    for (int i = 0; i < 30; i++) {
-      cout << vec[i] << " ";
-    }
-    stats st;
-    st = sort_natural_two_way_merge(vec);
-    cout << endl << "mas= ";
-    for (int i = 0; i < 30; i++) {
-      cout << vec[i] << " ";
-    }
-    cout << endl << st.comparison_count << endl;
-    cout << endl << st.copy_count;
-  }
+  setlocale(LC_ALL, "ru");
+  test_random_arrays_task1();
+  test_sorted_arrays_task1();
+  test_reverse_sorted_arrays_task1();
+  test_random_arrays_task2();
+  test_sorted_arrays_task2();
+  test_reverse_sorted_arrays_task2();
+  test_random_arrays_task3();
+  test_sorted_arrays_task3();
+  test_reverse_sorted_arrays_task3();
+  return 0;
 }
