@@ -46,7 +46,7 @@ private:
       return;
     }
     print(node->left);
-    cout << node->value;
+    cout << node->value<< " ";
     print(node->right);
   }
 
@@ -120,8 +120,7 @@ public:
   set() = default;
 
   set(const set& other) {
-    _root = new Node();
-    copy_tree(other._root);
+    _root = copy_tree(other._root);
   }
 
   set& operator=(const set& other)
@@ -130,8 +129,8 @@ public:
     {
       set tmp(other);
       std::swap(tmp._root, this->_root);
-      return *this;
     }
+    return *this;
   }
 
   bool contains(int key) const {
