@@ -9,14 +9,6 @@ struct Node {
   Node() = default;
   Node(int value) : value(value), left(nullptr), right(nullptr) {};
   Node(int value, Node* left, Node* right) : value(value), left(left), right(right) {};
-  ~Node() {
-    if (left) {
-      delete left;
-    }
-    if (right) {
-      delete right;
-    }
-  }
 };
 
 class set {
@@ -49,6 +41,71 @@ private:
     else { return true; }
   }
 
+  void print(Node* node) const {
+    if (node == nullptr) {
+      return;
+    }
+    print(node->left);
+    cout << node->value;
+    print(node->right);
+  }
+
+  Node* erase(Node* root, int value) {
+    if (!root)
+      return nullptr;
+
+    if (value < root->value) {
+      root->left = erase(root->left, value);
+    }
+    else if (value > root->value) {
+      root->right = erase(root->right, value);
+    }
+    else {
+      Node* oldNode = root;
+
+      if (!root->left || !root->right) {
+        root = (!root->left) ? root->right : root->left;
+        delete oldNode;
+      }
+      else {
+        Node* max_in_left = get_max(root->left);
+        root->value = max_in_left->value;
+        root->left = erase(root->left, max_in_left->value);
+      }
+    }
+    return root;
+  }
+
+  Node* get_max(Node* root) {
+    if (!root) {
+      return nullptr;
+    }
+    if (!root->right) {
+      return root;
+    }
+    return get_max(root->right);
+  }
+
+  Node* get_min(Node* root) {
+    if (!root) {
+      return nullptr;
+    }
+    if (!root->left) {
+      return root;
+    }
+    return get_min(root->left);
+  }
+
+  void delete_tree(Node* node)
+  {
+    if (!node)
+      return;
+
+    delete_tree(node->left);
+    delete_tree(node->right);
+    delete node;
+  }
+
 public:
   set() = default;
 
@@ -63,8 +120,61 @@ public:
     _root = insert(_root, value);
     return true;
   }
+
+  void print() const{
+    print(_root);
+    cout << endl;
+  }
+
+  bool erase(int value)
+  {
+    if (!contains(_root, value))
+      return false;
+
+    _root = erase(_root, value);
+    return true;
+  }
+
+  ~set() {
+    delete_tree(_root);
+  }
+ 
 };
 
 int main() {
-  
+  set s;
+    
+    // Вставка
+    s.insert(5);
+    s.insert(3);
+    s.insert(7);
+    s.insert(2);
+    s.insert(4);
+    s.insert(6);
+    s.insert(8);
+    
+    cout << "Initial: ";
+    s.print();  // 2345678
+    
+    // Удаление листа
+    s.erase(2);
+    cout << "After erase(2): ";
+    s.print();  // 345678
+    
+    // Удаление узла с одним ребенком
+    s.erase(3);
+    cout << "After erase(3): ";
+    s.print();  // 45678
+    
+    // Удаление узла с двумя детьми
+    s.erase(5);
+    cout << "After erase(5): ";
+    s.print();  // 4678
+    
+    // Попытка удалить несуществующий элемент
+    if (!s.erase(100)) {
+        cout << "100 not found" << endl;
+    }
+    
+    return 0;
 }
