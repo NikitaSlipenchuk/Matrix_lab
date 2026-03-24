@@ -106,8 +106,33 @@ private:
     delete node;
   }
 
+  Node* copy_tree(Node* other)
+  {
+    if (!other)
+      return nullptr;
+    Node* res = new Node(other->value);
+    res->left = copy_tree(other->left);
+    res->right = copy_tree(other->right);
+    return res;
+  }
+
 public:
   set() = default;
+
+  set(const set& other) {
+    _root = new Node();
+    copy_tree(other._root);
+  }
+
+  set& operator=(const set& other)
+  {
+    if (this != &other)
+    {
+      set tmp(other);
+      std::swap(tmp._root, this->_root);
+      return *this;
+    }
+  }
 
   bool contains(int key) const {
     return contains(_root, key);
